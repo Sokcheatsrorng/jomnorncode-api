@@ -1,0 +1,57 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:15-alpine
+    container_name: jomnorncode_postgres
+    environment:
+      POSTGRES_DB: jomnorncode_db
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: qwerqwer
+    ports:
+      - "5431:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - jomnorncode_network
+
+  # Spring Boot Application
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: jomnorncode_app
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/jomnorncode_db
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: qwerqwer
+      JWT_SECRET_KEY: a3f8c2e1d4b7960f5e2a1c8d3b6f9e0a2c5d8f1b4e7a0c3d6f9b2e5a8c1d4f7
+      JWT_EXPIRATION: 86400000
+      SPRING_JPA_HIBERNATE_DDL_AUTO: update
+      # ← You can reference this path in your application.properties/yaml
+      FILE_UPLOAD_DIR: /app/uploads
+    ports:
+      - "8060:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    volumes:
+      # Persistent storage for uploaded files
+      - file_uploads:/app/uploads
+    networks:
+      - jomnorncode_network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  file_uploads:           # ← new named volume for uploaded files
+
+networks:
+  jomnorncode_network:
+    driver: bridge
