@@ -14,9 +14,9 @@ public class OpenApiConfig {
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
-//                .addServersItem(new Server()
-//                        .url("http://jomnorncode-api.cheat.casa/api")
-//                        .description("Production HTTPS"))
+                .addServersItem(new Server()
+                        .url("http://jomnorncode-api.cheat.casa/api")
+                        .description("Production HTTPS"))
                 .info(new Info()
                         .title("Jomnorncode API")
                         .version("1.0.0")
