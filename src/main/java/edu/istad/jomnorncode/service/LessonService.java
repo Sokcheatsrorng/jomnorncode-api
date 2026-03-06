@@ -5,6 +5,7 @@ import edu.istad.jomnorncode.dto.LessonRequest;
 import edu.istad.jomnorncode.dto.LessonResponse;
 import edu.istad.jomnorncode.entity.Course;
 import edu.istad.jomnorncode.entity.Lesson;
+import edu.istad.jomnorncode.exception.ResourceNotFoundException;
 import edu.istad.jomnorncode.repository.CourseRepository;
 import edu.istad.jomnorncode.repository.LessonRepository;
 import lombok.RequiredArgsConstructor;
@@ -25,15 +26,16 @@ public class LessonService {
     private final CourseRepository courseRepository;
 
     public LessonResponse createLesson(LessonRequest request) {
+        // Use correct exception for Course not found
         Course course = courseRepository.findById(request.getCourseId())
-                .orElseThrow(() -> new RuntimeException("Course not found with id: " + request.getCourseId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + request.getCourseId()));
 
         Lesson lesson = new Lesson();
         lesson.setLessonTitle(request.getTitle());
         lesson.setDescription(request.getDescription());
         lesson.setContent(request.getContent());
         lesson.setVideoUrl(request.getVideoUrl());
-        lesson.setVideoDuration(request.getDuration());
+        lesson.setVideoDuration(request.getDuration());   // Fixed: assuming entity has setVideoDuration
         lesson.setSequenceNumber(request.getSequenceNumber());
         lesson.setCourse(course);
         lesson.setCreatedAt(LocalDateTime.now());
@@ -45,7 +47,7 @@ public class LessonService {
     @Transactional(readOnly = true)
     public LessonResponse getLessonById(Long id) {
         Lesson lesson = lessonRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Lesson not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Lesson not found with id: " + id));
         return mapToResponse(lesson);
     }
 
@@ -70,8 +72,9 @@ public class LessonService {
     }
 
     public LessonResponse updateLesson(Long id, LessonRequest request) {
+        // Use correct exception for Lesson not found
         Lesson lesson = lessonRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Lesson not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Lesson not found with id: " + id));
 
         if (request.getTitle() != null && !request.getTitle().isEmpty()) {
             lesson.setLessonTitle(request.getTitle());
@@ -86,7 +89,7 @@ public class LessonService {
             lesson.setVideoUrl(request.getVideoUrl());
         }
         if (request.getDuration() != null) {
-            lesson.setDuration(request.getDuration());
+            lesson.setVideoDuration(request.getDuration());
         }
         if (request.getSequenceNumber() != null) {
             lesson.setSequenceNumber(request.getSequenceNumber());
@@ -98,8 +101,10 @@ public class LessonService {
     }
 
     public void deleteLesson(Long id) {
+        // Use correct exception for Lesson not found
         Lesson lesson = lessonRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Lesson not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Lesson not found with id: " + id));
+
         lessonRepository.delete(lesson);
     }
 
@@ -110,7 +115,7 @@ public class LessonService {
                 .description(lesson.getDescription())
                 .content(lesson.getContent())
                 .videoUrl(lesson.getVideoUrl())
-                .duration(lesson.getDuration())
+                .duration(lesson.getVideoDuration())           // Fixed field name consistency
                 .sequenceNumber(lesson.getSequenceNumber())
                 .course(CourseResponse.fromEntity(lesson.getCourse()))
                 .createdAt(lesson.getCreatedAt())

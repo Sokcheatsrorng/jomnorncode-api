@@ -8,7 +8,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -41,7 +43,17 @@ public class UserProgressController {
     @Operation(summary = "Get all progress records for a user with pagination")
     public ResponseEntity<Page<UserProgressResponse>> getProgressByUser(
             @PathVariable Long userId,
-            Pageable pageable) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction) {
+
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("asc")
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
+
         Page<UserProgressResponse> response = userProgressService.getProgressByUser(userId, pageable);
         return ResponseEntity.ok(response);
     }
@@ -50,7 +62,17 @@ public class UserProgressController {
     @Operation(summary = "Get all progress records for a lesson with pagination")
     public ResponseEntity<Page<UserProgressResponse>> getProgressByLesson(
             @PathVariable Long lessonId,
-            Pageable pageable) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction) {
+
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("asc")
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
+
         Page<UserProgressResponse> response = userProgressService.getProgressByLesson(lessonId, pageable);
         return ResponseEntity.ok(response);
     }
@@ -60,14 +82,36 @@ public class UserProgressController {
     public ResponseEntity<Page<UserProgressResponse>> getProgressByUserAndLesson(
             @PathVariable Long userId,
             @PathVariable Long lessonId,
-            Pageable pageable) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction) {
+
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("asc")
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
+
         Page<UserProgressResponse> response = userProgressService.getProgressByUserAndLesson(userId, lessonId, pageable);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping
     @Operation(summary = "Get all progress records with pagination")
-    public ResponseEntity<Page<UserProgressResponse>> getAllProgress(Pageable pageable) {
+    public ResponseEntity<Page<UserProgressResponse>> getAllProgress(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction
+    ) {
+
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("asc")
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
+
         Page<UserProgressResponse> response = userProgressService.getAllProgress(pageable);
         return ResponseEntity.ok(response);
     }

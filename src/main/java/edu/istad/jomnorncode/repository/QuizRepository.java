@@ -11,11 +11,8 @@ import java.util.List;
 
 @Repository
 public interface QuizRepository extends JpaRepository<Quiz, Long> {
+
     Page<Quiz> findByLessonLessonId(Long lessonId, Pageable pageable);
-
-    Page<Quiz> findByQuestionType(String questionType, Pageable pageable);
-
-    Page<Quiz> findByDifficulty(String difficulty, Pageable pageable);
 
     long countByLessonLessonId(Long lessonId);
 }

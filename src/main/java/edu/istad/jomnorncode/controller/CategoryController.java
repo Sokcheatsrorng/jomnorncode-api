@@ -8,7 +8,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -39,7 +41,19 @@ public class CategoryController {
 
     @GetMapping
     @Operation(summary = "Get all categories with pagination")
-    public ResponseEntity<Page<CategoryResponse>> getAllCategories(Pageable pageable) {
+    public ResponseEntity<Page<CategoryResponse>> getAllCategories(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction
+    ) {
+
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("asc")
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
+
         Page<CategoryResponse> response = categoryService.getAllCategories(pageable);
         return ResponseEntity.ok(response);
     }
@@ -48,7 +62,17 @@ public class CategoryController {
     @Operation(summary = "Search categories by name or description")
     public ResponseEntity<Page<CategoryResponse>> searchCategories(
             @PathVariable String searchTerm,
-            Pageable pageable) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction) {
+
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("asc")
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
+
         Page<CategoryResponse> response = categoryService.searchCategories(searchTerm, pageable);
         return ResponseEntity.ok(response);
     }

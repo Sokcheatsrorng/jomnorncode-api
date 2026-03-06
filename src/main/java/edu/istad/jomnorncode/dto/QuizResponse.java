@@ -27,6 +27,14 @@ public class QuizResponse {
 
     private Long lessonId;
 
+    private Boolean isPublished = false;
+
+    private Integer timeLimit;
+
+    private Integer totalQuestions;
+
+    private Integer passingScore;
+
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;

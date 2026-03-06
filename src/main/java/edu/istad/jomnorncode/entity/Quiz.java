@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "quizzes")
@@ -28,23 +30,18 @@ public class Quiz {
     @Column(columnDefinition = "TEXT")
     private String description;
 
-    @Column(name = "passing_score")
     private Integer passingScore;
 
-    @Column(name = "time_limit")
     private Integer timeLimit;
 
-    @Column(name = "total_questions")
     private Integer totalQuestions;
-
-    private String question;
-
-    private String questionType;
-
-    private String difficulty;
 
     @Column(name = "is_published")
     private Boolean isPublished = false;
+
+
+    @OneToMany(mappedBy = "quiz", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Question> questions = new ArrayList<>();
 
     @Column(name = "created_at", updatable = false)
     private LocalDateTime createdAt;
@@ -52,16 +49,8 @@ public class Quiz {
     @Column(name = "updated_at")
     private LocalDateTime updatedAt;
 
-
-
     @PrePersist
-    protected void onCreate() {
-        createdAt = LocalDateTime.now();
-        updatedAt = LocalDateTime.now();
-    }
-
+    protected void onCreate() { createdAt = LocalDateTime.now(); updatedAt = LocalDateTime.now(); }
     @PreUpdate
-    protected void onUpdate() {
-        updatedAt = LocalDateTime.now();
-    }
+    protected void onUpdate() { updatedAt = LocalDateTime.now(); }
 }

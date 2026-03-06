@@ -8,7 +8,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -41,7 +43,17 @@ public class ReviewController {
     @Operation(summary = "Get all reviews for a course with pagination")
     public ResponseEntity<Page<ReviewResponse>> getReviewsByCourse(
             @PathVariable Long courseId,
-            Pageable pageable) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction
+            ) {
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("asc")
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
+
         Page<ReviewResponse> response = reviewService.getReviewsByCourse(courseId, pageable);
         return ResponseEntity.ok(response);
     }
@@ -50,14 +62,35 @@ public class ReviewController {
     @Operation(summary = "Get all reviews by a user with pagination")
     public ResponseEntity<Page<ReviewResponse>> getReviewsByUser(
             @PathVariable Long userId,
-            Pageable pageable) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction) {
+
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("asc")
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
+
         Page<ReviewResponse> response = reviewService.getReviewsByUser(userId, pageable);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping
     @Operation(summary = "Get all reviews with pagination")
-    public ResponseEntity<Page<ReviewResponse>> getAllReviews(Pageable pageable) {
+    public ResponseEntity<Page<ReviewResponse>> getAllReviews(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction
+    ) {
+
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("asc")
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
         Page<ReviewResponse> response = reviewService.getAllReviews(pageable);
         return ResponseEntity.ok(response);
     }
@@ -81,7 +114,16 @@ public class ReviewController {
     public ResponseEntity<Page<ReviewResponse>> getReviewsByCourseAndRating(
             @PathVariable Long courseId,
             @PathVariable Integer rating,
-            Pageable pageable) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction) {
+
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("asc")
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
         Page<ReviewResponse> response = reviewService.getReviewsByCourseAndRating(courseId, rating, pageable);
         return ResponseEntity.ok(response);
     }

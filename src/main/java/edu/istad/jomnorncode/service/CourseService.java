@@ -7,6 +7,7 @@ import edu.istad.jomnorncode.dto.CourseUpdateRequest;
 import edu.istad.jomnorncode.entity.Category;
 import edu.istad.jomnorncode.entity.Course;
 import edu.istad.jomnorncode.entity.User;
+import edu.istad.jomnorncode.exception.ResourceNotFoundException;
 import edu.istad.jomnorncode.repository.CategoryRepository;
 import edu.istad.jomnorncode.repository.CourseRepository;
 import edu.istad.jomnorncode.repository.UserRepository;
@@ -35,7 +36,7 @@ public class CourseService {
         log.info("Creating new course: {}", request.getCourseTitle());
 
         Category category = categoryRepository.findById(request.getCategoryId())
-                .orElseThrow(() -> new RuntimeException("Category not found"));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
 
 
 
@@ -57,7 +58,7 @@ public class CourseService {
     // ===================== READ =====================
     public CourseResponse getCourseById(Long courseId) {
         Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new RuntimeException("Course not found with id: " + courseId));
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
 
         return CourseResponse.fromEntity(course);
     }
@@ -76,7 +77,7 @@ public class CourseService {
     // ===================== UPDATE =====================
     public CourseResponse updateCourse(Long courseId, CourseUpdateRequest request) {
         Course course = courseRepository.findById(courseId)
-                .orElseThrow(() -> new RuntimeException("Course not found with id: " + courseId));
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + courseId));
 
         if (request.getCourseCode() != null) course.setCourseCode(request.getCourseCode());
         if (request.getCourseTitle() != null) course.setCourseTitle(request.getCourseTitle());
@@ -88,7 +89,7 @@ public class CourseService {
 
         if (request.getCategoryId() != null) {
             Category category = categoryRepository.findById(request.getCategoryId())
-                    .orElseThrow(() -> new RuntimeException("Category not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
             course.setCategory(category);
         }
 
@@ -105,7 +106,7 @@ public class CourseService {
     // ===================== DELETE =====================
     public void deleteCourse(Long courseId) {
         if (!courseRepository.existsById(courseId)) {
-            throw new RuntimeException("Course not found with id: " + courseId);
+            throw new ResourceNotFoundException("Course not found with id: " + courseId);
         }
         courseRepository.deleteById(courseId);
         log.info("Course deleted successfully: {}", courseId);

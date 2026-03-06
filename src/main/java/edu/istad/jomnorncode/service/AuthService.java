@@ -6,6 +6,7 @@ import edu.istad.jomnorncode.dto.RegistrationRequest;
 import edu.istad.jomnorncode.dto.UserMeResponse;
 import edu.istad.jomnorncode.entity.Role;
 import edu.istad.jomnorncode.entity.User;
+import edu.istad.jomnorncode.exception.ResourceNotFoundException;
 import edu.istad.jomnorncode.repository.RoleRepository;
 import edu.istad.jomnorncode.repository.UserRepository;
 import edu.istad.jomnorncode.util.JwtTokenUtil;
@@ -55,7 +56,7 @@ public class AuthService {
 
             // Get default USER role
             Role userRole = roleRepository.findByRoleName("USER")
-                    .orElseThrow(() -> new RuntimeException("Default USER role not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Default USER role not found"));
 
             // Create user
             User user = User.builder()
@@ -123,7 +124,7 @@ public class AuthService {
 
             // Load full user entity for the response
             User user = userRepository.findByEmail(request.getEmail())
-                    .orElseThrow(() -> new RuntimeException("User not found after authentication"));
+                    .orElseThrow(() -> new ResourceNotFoundException("User not found after authentication"));
 
             log.info("User logged in successfully: {}", request.getEmail());
 

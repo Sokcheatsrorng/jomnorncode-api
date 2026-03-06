@@ -3,6 +3,7 @@ package edu.istad.jomnorncode.service;
 import edu.istad.jomnorncode.dto.CategoryRequest;
 import edu.istad.jomnorncode.dto.CategoryResponse;
 import edu.istad.jomnorncode.entity.Category;
+import edu.istad.jomnorncode.exception.ResourceNotFoundException;
 import edu.istad.jomnorncode.repository.CategoryRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -34,7 +35,7 @@ public class CategoryService {
     @Transactional(readOnly = true)
     public CategoryResponse getCategoryById(Long id) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
         return mapToResponse(category);
     }
 
@@ -53,7 +54,7 @@ public class CategoryService {
 
     public CategoryResponse updateCategory(Long id, CategoryRequest request) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
 
         if (request.getName() != null && !request.getName().isEmpty()) {
             category.setCategoryName(request.getName());
@@ -72,7 +73,7 @@ public class CategoryService {
 
     public void deleteCategory(Long id) {
         Category category = categoryRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Category not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found with id: " + id));
         categoryRepository.delete(category);
     }
 

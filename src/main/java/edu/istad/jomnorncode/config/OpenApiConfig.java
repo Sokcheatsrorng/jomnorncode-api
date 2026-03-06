@@ -15,7 +15,7 @@ public class OpenApiConfig {
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
                 .addServersItem(new Server()
-                        .url("http://jomnorncode-api.cheat.casa/api")
+                        .url("https://jomnorncode-api.cheat.casa/api")
                         .description("Production HTTPS"))
                 .info(new Info()
                         .title("Jomnorncode API")

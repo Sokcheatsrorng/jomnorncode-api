@@ -5,6 +5,7 @@ import edu.istad.jomnorncode.dto.UserProgressResponse;
 import edu.istad.jomnorncode.entity.Lesson;
 import edu.istad.jomnorncode.entity.User;
 import edu.istad.jomnorncode.entity.UserProgress;
+import edu.istad.jomnorncode.exception.ResourceNotFoundException;
 import edu.istad.jomnorncode.repository.LessonRepository;
 import edu.istad.jomnorncode.repository.UserProgressRepository;
 import edu.istad.jomnorncode.repository.UserRepository;
@@ -27,10 +28,10 @@ public class UserProgressService {
 
     public UserProgressResponse recordProgress(UserProgressRequest request) {
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + request.getUserId()));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + request.getUserId()));
 
         Lesson lesson = lessonRepository.findById(request.getLessonId())
-                .orElseThrow(() -> new RuntimeException("Lesson not found with id: " + request.getLessonId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Lesson not found with id: " + request.getLessonId()));
 
         UserProgress progress = new UserProgress();
         progress.setUser(user);
@@ -47,7 +48,7 @@ public class UserProgressService {
     @Transactional(readOnly = true)
     public UserProgressResponse getProgressById(Long id) {
         UserProgress progress = userProgressRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User progress not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("User progress not found with id: " + id));
         return mapToResponse(progress);
     }
 
@@ -88,7 +89,7 @@ public class UserProgressService {
 
     public UserProgressResponse updateProgress(Long id, UserProgressRequest request) {
         UserProgress progress = userProgressRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User progress not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("User progress not found with id: " + id));
 
         if (request.getStatus() != null && !request.getStatus().isEmpty()) {
             progress.setStatus(request.getStatus());
@@ -107,7 +108,7 @@ public class UserProgressService {
 
     public UserProgressResponse markAsComplete(Long id) {
         UserProgress progress = userProgressRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User progress not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("User progress not found with id: " + id));
 
         progress.setStatus("COMPLETED");
         progress.setCompletionDate(LocalDateTime.now());
@@ -119,7 +120,7 @@ public class UserProgressService {
 
     public void deleteProgress(Long id) {
         UserProgress progress = userProgressRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User progress not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("User progress not found with id: " + id));
         userProgressRepository.delete(progress);
     }
 

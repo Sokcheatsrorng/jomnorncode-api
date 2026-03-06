@@ -5,6 +5,7 @@ import edu.istad.jomnorncode.dto.ReviewResponse;
 import edu.istad.jomnorncode.entity.Course;
 import edu.istad.jomnorncode.entity.Review;
 import edu.istad.jomnorncode.entity.User;
+import edu.istad.jomnorncode.exception.ResourceNotFoundException;
 import edu.istad.jomnorncode.repository.CourseRepository;
 import edu.istad.jomnorncode.repository.ReviewRepository;
 import edu.istad.jomnorncode.repository.UserRepository;
@@ -27,10 +28,10 @@ public class ReviewService {
 
     public ReviewResponse createReview(ReviewRequest request) {
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + request.getUserId()));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + request.getUserId()));
 
         Course course = courseRepository.findById(request.getCourseId())
-                .orElseThrow(() -> new RuntimeException("Course not found with id: " + request.getCourseId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + request.getCourseId()));
 
         // Validate rating
         if (request.getRating() < 1 || request.getRating() > 5) {
@@ -51,7 +52,7 @@ public class ReviewService {
     @Transactional(readOnly = true)
     public ReviewResponse getReviewById(Long id) {
         Review review = reviewRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Review not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Review not found with id: " + id));
         return mapToResponse(review);
     }
 
@@ -111,7 +112,7 @@ public class ReviewService {
 
     public void deleteReview(Long id) {
         Review review = reviewRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Review not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Review not found with id: " + id));
         reviewRepository.delete(review);
     }
 

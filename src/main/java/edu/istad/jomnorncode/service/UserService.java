@@ -4,14 +4,17 @@ import edu.istad.jomnorncode.dto.UserRequest;
 import edu.istad.jomnorncode.dto.UserResponse;
 import edu.istad.jomnorncode.entity.Role;
 import edu.istad.jomnorncode.entity.User;
+import edu.istad.jomnorncode.exception.ResourceNotFoundException;
 import edu.istad.jomnorncode.repository.RoleRepository;
 import edu.istad.jomnorncode.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.HashSet;
@@ -28,11 +31,11 @@ public class UserService {
 
     public UserResponse createUser(UserRequest request) {
         if (userRepository.existsByUsername(request.getUsername())) {
-            throw new RuntimeException("Username already exists: " + request.getUsername());
+            throw new ResourceNotFoundException("Username already exists: " + request.getUsername());
         }
 
         if (userRepository.existsByEmail(request.getEmail())) {
-            throw new RuntimeException("Email already exists: " + request.getEmail());
+            throw new ResourceNotFoundException("Email already exists: " + request.getEmail());
         }
 
         User user = new User();
@@ -50,12 +53,12 @@ public class UserService {
         if (request.getRoleIds() != null && !request.getRoleIds().isEmpty()) {
             request.getRoleIds().forEach(roleId -> {
                 Role role = roleRepository.findById(roleId)
-                        .orElseThrow(() -> new RuntimeException("Role not found with id: " + roleId));
+                        .orElseThrow(() -> new ResourceNotFoundException("Role not found with id: " + roleId));
                 roles.add(role);
             });
         } else {
             Role userRole = roleRepository.findByRoleName("USER")
-                    .orElseThrow(() -> new RuntimeException("Default USER role not found"));
+                    .orElseThrow(() -> new ResourceNotFoundException("Default USER role not found"));
             roles.add(userRole);
         }
         user.setRoles(roles);
@@ -69,21 +72,21 @@ public class UserService {
     @Transactional(readOnly = true)
     public UserResponse getUserById(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         return mapToResponse(user);
     }
 
     @Transactional(readOnly = true)
     public UserResponse getUserByUsername(String username) {
         User user = userRepository.findByUsername(username)
-                .orElseThrow(() -> new RuntimeException("User not found with username: " + username));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with username: " + username));
         return mapToResponse(user);
     }
 
     @Transactional(readOnly = true)
     public UserResponse getUserByEmail(String email) {
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new RuntimeException("User not found with email: " + email));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
         return mapToResponse(user);
     }
 
@@ -144,12 +147,12 @@ public class UserService {
 
     public void updateUserRoles(Long userId, Set<Long> roleIds) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
         Set<Role> roles = new HashSet<>();
         roleIds.forEach(roleId -> {
             Role role = roleRepository.findById(roleId)
-                    .orElseThrow(() -> new RuntimeException("Role not found with id: " + roleId));
+                    .orElseThrow(() -> new ResourceNotFoundException("Role not found with id: " + roleId));
             roles.add(role);
         });
 
@@ -160,10 +163,10 @@ public class UserService {
 
     public void changePassword(Long userId, String oldPassword, String newPassword) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
         if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
-            throw new RuntimeException("Old password is incorrect");
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST,"Old password is incorrect");
         }
 
         user.setPassword(passwordEncoder.encode(newPassword));
@@ -173,7 +176,7 @@ public class UserService {
 
     public void enableUser(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
         user.setEnabled(true);
         user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
@@ -181,7 +184,7 @@ public class UserService {
 
     public void disableUser(Long userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
         user.setEnabled(false);
         user.setUpdatedAt(LocalDateTime.now());
         userRepository.save(user);
@@ -189,7 +192,7 @@ public class UserService {
 
     public void deleteUser(Long id) {
         User user = userRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + id));
         userRepository.delete(user);
     }
 

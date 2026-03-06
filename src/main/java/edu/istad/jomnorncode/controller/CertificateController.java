@@ -8,7 +8,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -41,7 +43,17 @@ public class CertificateController {
     @Operation(summary = "Get all certificates for a user with pagination")
     public ResponseEntity<Page<CertificateResponse>> getCertificatesByUser(
             @PathVariable Long userId,
-            Pageable pageable) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction) {
+
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("asc")
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
+
         Page<CertificateResponse> response = certificateService.getCertificatesByUser(userId, pageable);
         return ResponseEntity.ok(response);
     }
@@ -50,14 +62,36 @@ public class CertificateController {
     @Operation(summary = "Get all certificates for a course with pagination")
     public ResponseEntity<Page<CertificateResponse>> getCertificatesByCourse(
             @PathVariable Long courseId,
-            Pageable pageable) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction) {
+
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("asc")
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
+
         Page<CertificateResponse> response = certificateService.getCertificatesByCourse(courseId, pageable);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping
     @Operation(summary = "Get all certificates with pagination")
-    public ResponseEntity<Page<CertificateResponse>> getAllCertificates(Pageable pageable) {
+    public ResponseEntity<Page<CertificateResponse>> getAllCertificates(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction
+    ) {
+
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("asc")
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
+
         Page<CertificateResponse> response = certificateService.getAllCertificates(pageable);
         return ResponseEntity.ok(response);
     }

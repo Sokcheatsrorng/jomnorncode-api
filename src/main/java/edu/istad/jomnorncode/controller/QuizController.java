@@ -8,7 +8,9 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -41,42 +43,67 @@ public class QuizController {
     @Operation(summary = "Get all quizzes for a lesson with pagination")
     public ResponseEntity<Page<QuizResponse>> getQuizzesByLesson(
             @PathVariable Long lessonId,
-            Pageable pageable) {
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction) {
+
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("asc")
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
+
         Page<QuizResponse> response = quizService.getQuizzesByLesson(lessonId, pageable);
         return ResponseEntity.ok(response);
     }
 
     @GetMapping
     @Operation(summary = "Get all quizzes with pagination")
-    public ResponseEntity<Page<QuizResponse>> getAllQuizzes(Pageable pageable) {
+    public ResponseEntity<Page<QuizResponse>> getAllQuizzes(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "createdAt") String sortBy,
+            @RequestParam(defaultValue = "desc") String direction
+    ) {
+
+        Sort.Direction sortDirection = direction.equalsIgnoreCase("asc")
+                ? Sort.Direction.ASC
+                : Sort.Direction.DESC;
+
+        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
+
         Page<QuizResponse> response = quizService.getAllQuizzes(pageable);
         return ResponseEntity.ok(response);
     }
 
-    @GetMapping("/difficulty/{difficulty}")
-    @Operation(summary = "Get quizzes by difficulty level")
-    public ResponseEntity<Page<QuizResponse>> getQuizzesByDifficulty(
-            @PathVariable String difficulty,
-            Pageable pageable) {
-        Page<QuizResponse> response = quizService.getQuizzesByDifficulty(difficulty, pageable);
-        return ResponseEntity.ok(response);
-    }
+//    @GetMapping("/difficulty/{difficulty}")
+//    @Operation(summary = "Get quizzes by difficulty level")
+//    public ResponseEntity<Page<QuizResponse>> getQuizzesByDifficulty(
+//            @PathVariable String difficulty,
+//            @RequestParam(defaultValue = "0") int page,
+//            @RequestParam(defaultValue = "10") int size,
+//            @RequestParam(defaultValue = "createdAt") String sortBy,
+//            @RequestParam(defaultValue = "desc") String direction) {
+//
+//        Sort.Direction sortDirection = direction.equalsIgnoreCase("asc")
+//                ? Sort.Direction.ASC
+//                : Sort.Direction.DESC;
+//
+//        Pageable pageable = PageRequest.of(page, size, Sort.by(sortDirection, sortBy));
+//
+//        Page<QuizResponse> response = quizService.getQuizzesByDifficulty(difficulty, pageable);
+//        return ResponseEntity.ok(response);
+//    }
 
-    @GetMapping("/type/{questionType}")
-    @Operation(summary = "Get quizzes by question type")
-    public ResponseEntity<Page<QuizResponse>> getQuizzesByType(
-            @PathVariable String questionType,
-            Pageable pageable) {
-        Page<QuizResponse> response = quizService.getQuizzesByType(questionType, pageable);
-        return ResponseEntity.ok(response);
-    }
 
-    @GetMapping("/lesson/{lessonId}/count")
-    @Operation(summary = "Get quiz count for a lesson")
-    public ResponseEntity<Long> getQuizCountByLesson(@PathVariable Long lessonId) {
-        long count = quizService.getQuizCountByLesson(lessonId);
-        return ResponseEntity.ok(count);
-    }
+
+//    @GetMapping("/lesson/{lessonId}/count")
+//    @Operation(summary = "Get quiz count for a lesson")
+//    public ResponseEntity<Long> getQuizCountByLesson(@PathVariable Long lessonId) {
+//        long count = quizService.getQuizCountByLesson(lessonId);
+//        return ResponseEntity.ok(count);
+//    }
 
     @PutMapping("/{id}")
     @PreAuthorize("hasAnyRole('ADMIN', 'INSTRUCTOR')")

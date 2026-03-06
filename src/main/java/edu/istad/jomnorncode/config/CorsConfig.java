@@ -22,7 +22,7 @@ public class CorsConfig {
                 "http://localhost:3000",      // Create React App
                 "http://localhost:5173",      // Vite (very common)
                 "http://localhost:4200",      // Angular (if you use it)
-                "https://your-frontend-domain.com",   // ← add your production domain later
+                "https://jomnorncode-api.cheat.casa",   // ← add your production domain later
                 "https://www.your-frontend-domain.com"
         );
 

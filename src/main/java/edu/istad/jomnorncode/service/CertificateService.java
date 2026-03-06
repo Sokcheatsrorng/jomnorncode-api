@@ -5,14 +5,17 @@ import edu.istad.jomnorncode.dto.CertificateResponse;
 import edu.istad.jomnorncode.entity.Certificate;
 import edu.istad.jomnorncode.entity.Course;
 import edu.istad.jomnorncode.entity.User;
+import edu.istad.jomnorncode.exception.ResourceNotFoundException;
 import edu.istad.jomnorncode.repository.CertificateRepository;
 import edu.istad.jomnorncode.repository.CourseRepository;
 import edu.istad.jomnorncode.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
@@ -28,14 +31,14 @@ public class CertificateService {
 
     public CertificateResponse issueCertificate(CertificateRequest request) {
         User user = userRepository.findById(request.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + request.getUserId()));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + request.getUserId()));
 
         Course course = courseRepository.findById(request.getCourseId())
-                .orElseThrow(() -> new RuntimeException("Course not found with id: " + request.getCourseId()));
+                .orElseThrow(() -> new ResourceNotFoundException("Course not found with id: " + request.getCourseId()));
 
         // Check if certificate already issued
         if (certificateRepository.existsByUserUserIdAndCourseCourseId(request.getUserId(), request.getCourseId())) {
-            throw new RuntimeException("Certificate already issued to this user for this course");
+            throw new ResponseStatusException(HttpStatus.CONFLICT,"Certificate already issued to this user for this course");
         }
 
         Certificate certificate = new Certificate();
@@ -53,7 +56,7 @@ public class CertificateService {
     @Transactional(readOnly = true)
     public CertificateResponse getCertificateById(Long id) {
         Certificate certificate = certificateRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Certificate not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Certificate not found with id: " + id));
         return mapToResponse(certificate);
     }
 
@@ -78,7 +81,7 @@ public class CertificateService {
     @Transactional(readOnly = true)
     public CertificateResponse getCertificateByNumber(String certificateNumber) {
         Certificate certificate = certificateRepository.findByCertificateNumber(certificateNumber)
-                .orElseThrow(() -> new RuntimeException("Certificate not found with number: " + certificateNumber));
+                .orElseThrow(() -> new ResourceNotFoundException("Certificate not found with number: " + certificateNumber));
         return mapToResponse(certificate);
     }
 
@@ -94,7 +97,7 @@ public class CertificateService {
 
     public CertificateResponse updateCertificate(Long id, CertificateRequest request) {
         Certificate certificate = certificateRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Certificate not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Certificate not found with id: " + id));
 
         if (request.getFileUrl() != null && !request.getFileUrl().isEmpty()) {
             certificate.setCertificateUrl(request.getFileUrl());
@@ -107,13 +110,13 @@ public class CertificateService {
 
     public void deleteCertificate(Long id) {
         Certificate certificate = certificateRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Certificate not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Certificate not found with id: " + id));
         certificateRepository.delete(certificate);
     }
 
     public void revokeCertificate(Long id, String reason) {
         Certificate certificate = certificateRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Certificate not found with id: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Certificate not found with id: " + id));
         certificate.setRevokedAt(LocalDateTime.now());
         certificate.setRevokeReason(reason);
         certificateRepository.save(certificate);
